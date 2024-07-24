@@ -1,0 +1,118 @@
+CREATE DATABASE PersonalFinance;
+
+USE PersonalFinance;
+
+-- Create Users table
+CREATE TABLE Users (
+    user_id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50),
+    email VARCHAR(100)
+);
+
+-- Create Accounts table
+CREATE TABLE Accounts (
+    account_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    account_name VARCHAR(50),
+    balance DECIMAL(10, 2),
+    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+);
+
+-- Create Categories table
+CREATE TABLE Categories (
+    category_id INT PRIMARY KEY AUTO_INCREMENT,
+    category_name VARCHAR(50)
+);
+
+-- Create Transactions table
+CREATE TABLE Transactions (
+    transaction_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    account_id INT,
+    category_id INT,
+    amount DECIMAL(10, 2),
+    transaction_date DATE,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id),
+    FOREIGN KEY (account_id) REFERENCES Accounts(account_id),
+    FOREIGN KEY (category_id) REFERENCES Categories(category_id)
+);
+
+
+-- Insert data into Users table
+INSERT INTO Users (username, email)
+VALUES ('hritick', 'hritick@example.com'),
+       ('kushagar', 'kushagar@example.com');
+
+-- Insert data into Accounts table
+INSERT INTO Accounts (user_id, account_name, balance)
+VALUES (1, 'Checking', 1500.00),
+       (1, 'Savings', 5000.00),
+       (2, 'Checking', 2000.00),
+       (2, 'Savings', 3000.00);
+
+-- Insert data into Categories table
+INSERT INTO Categories (category_name)
+VALUES ('Groceries'),
+       ('Utilities'),
+       ('Entertainment'),
+       ('Rent');
+
+-- Insert data into Transactions table
+INSERT INTO Transactions (user_id, account_id, category_id, amount, transaction_date)
+VALUES (1, 1, 1, 100.00, '2024-05-01'),
+       (1, 1, 2, 50.00, '2024-05-05'),
+       (1, 2, 3, 150.00, '2024-05-10'),
+       (1, 2, 4, 500.00, '2024-05-15'),
+       (2, 3, 1, 200.00, '2024-05-02'),
+       (2, 3, 2, 75.00, '2024-05-06'),
+       (2, 4, 3, 100.00, '2024-05-12'),
+       (2, 4, 4, 800.00, '2024-05-16');
+
+SELECT * FROM Transactions
+WHERE user_id = 1;  -- hritick's user_id
+SELECT SUM(amount) AS total_spent
+FROM Transactions
+WHERE user_id = 1  -- hritick's user_id
+  AND MONTH(transaction_date) = 5
+  AND YEAR(transaction_date) = 2024;
+SELECT account_name, balance
+FROM Accounts
+WHERE user_id = 1;  -- hritick's user_id
+
+SELECT c.category_name, t.amount, t.transaction_date
+FROM Transactions t
+JOIN Categories c ON t.category_id = c.category_id
+WHERE t.user_id = 1  -- hritick's user_id
+ORDER BY c.category_name, t.transaction_date;
+
+SELECT c.category_name, AVG(t.amount) AS average_spending
+FROM Transactions t
+JOIN Categories c ON t.category_id = c.category_id
+WHERE t.user_id = 1  -- hritick's user_id
+GROUP BY c.category_name;
+
+-- Assuming we have a monthly income of $3000 for hritick
+DECLARE @monthly_income DECIMAL(10, 2) = 3000.00;
+
+-- Calculate total expenditure in May 2024
+DECLARE @total_expenditure DECIMAL(10, 2);
+
+SELECT @total_expenditure = SUM(amount)
+FROM Transactions
+WHERE user_id = 1  -- hritick's user_id
+  AND MONTH(transaction_date) = 5
+  AND YEAR(transaction_date) = 2024;
+
+-- Calculate savings
+DECLARE @savings DECIMAL(10, 2);
+SET @savings = @monthly_income - @total_expenditure;
+
+-- Output the result
+SELECT @savings AS monthly_savings;
+
+
+
+
+
+
+
